@@ -3,7 +3,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
 class DownFile {
@@ -21,14 +26,18 @@ class DownFile {
                 URL commect = new URL(URL_CSV);
                 InputStream stream = commect.openStream();
                 Scanner inputstrim = new Scanner(stream);
+                int k = 0;
+       //         System.out.println(inputstrim.nextLine());
+                while ((inputstrim.hasNext()) ){
+                    String data = inputstrim.nextLine();  //берем строку из файла
+                    //System.out.println(data);
+                        String value[] = spliter(data);
 
-                while (inputstrim.hasNext()){
-                    String data = inputstrim.next();  //берем строку из файла
-                    String value[] = data.split(","); // разбиваем строку из файла на массив строк
-
-                    if(dataInPeriod(value[10], value[11])) { //проверяем входит ли дата в период работ
-                        counter++;
-                    }
+                    System.out.println(value[10]);
+//                    if(dataInPeriod(value[10], value[11])) { //проверяем входит ли дата в период работ
+//                        counter++;
+//                    }
+                    k++;
                 }
                 inputstrim.close();
             }catch (FileNotFoundException e) {
@@ -39,12 +48,60 @@ class DownFile {
         }
     }
 
-    private boolean dataInPeriod(String dataBegin, String dataEnd) {
-        LocalDate begin = LocalDate.parse(dataBegin);
-        LocalDate end = LocalDate.parse(dataEnd);
-        LocalDate work = LocalDate.parse(DATA_WORK);
+  private String[] spliter(String data) {
+        int l = data.length();
 
-        if(work.isBefore(work)||(work.isAfter(end))) {
+      ArrayList <String> arrayList = new ArrayList<>();
+      StringBuilder temp = new StringBuilder();
+
+        for(int i = 0; i<l; i++) {
+            char ch = data.charAt(i);
+
+            if (i == 0) {
+                temp.append(ch);
+            } else if(i == (l-1)) {
+                temp.append(ch);
+                arrayList.add(temp.toString()); // добавляем временную строку в массив
+                temp.delete(0, temp.length()); // очищаем временную строку
+            } else {
+                char chP = data.charAt(i+1);
+                char chM = data.charAt(i-1);
+            if(((ch == ',')&&(chP == ' '))
+                ||((ch == ' ')&&(chM == ' '))) {
+
+            } else if(ch == ',') {
+                arrayList.add(temp.toString()); // добавляем временную строку в массив
+                temp.delete(0, temp.length()); // очищаем временную строку
+            }else
+                temp.append(ch);
+            }
+        }
+
+        String arr[] = arrayList.toArray(new String[arrayList.size()]);
+        return arr;
+    }
+
+
+
+
+
+
+
+
+
+
+    private boolean dataInPeriod(String dataBegin, String dataEnd) throws ParseException {
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+      //  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyMMdd");
+//        LocalDate begin = LocalDate.parse(dataBegin, formatter);
+//        LocalDate end = LocalDate.parse(dataEnd, formatter);
+//        LocalDate work = LocalDate.parse(DATA_WORK, formatter);
+
+        Date begin =  format.parse(dataBegin);
+        Date end =  format.parse(dataEnd);
+        Date work =  format.parse(DATA_WORK);
+
+        if(work.isBefore(begin)||(work.isAfter(end))) {
             return false;
         } else return true;
     }

@@ -12,6 +12,6 @@ public class Main {
         DownFile downFile = new DownFile(URL_CSV_main, DATA_main);
 
 
-        System.out.println(downFile.getCounterWorks());
+      //  System.out.println(downFile.getCounterWorks());
     }
 }
