@@ -1,19 +1,14 @@
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Scanner;
 
 class DownFile {
-    private String URL_CSV; // ссылка на файл csv
-    private String DATA_WORK; // дата, на которую смотрят количество работ
+    private final String URL_CSV; // ссылка на файл csv
+    private final String DATA_WORK; // дата, на которую смотрят количество работ
     private int counter; // количество дорожних работ на заданную дату, счетчик
 
     DownFile(String URL_CSV, String DATA_WORK) { // конструктор
@@ -26,21 +21,26 @@ class DownFile {
                 URL commect = new URL(URL_CSV);
                 InputStream stream = commect.openStream();
                 Scanner inputstrim = new Scanner(stream);
-                int k = 0;
-       //         System.out.println(inputstrim.nextLine());
-                while ((inputstrim.hasNext()) ){
+
+                //         System.out.println(inputstrim.nextLine());
+                while ((inputstrim.hasNext())) {
                     String data = inputstrim.nextLine();  //берем строку из файла
                     //System.out.println(data);
-                        String value[] = spliter(data);
+                    String value[] = spliter(data);
 
-                    System.out.println(value[10]);
-//                    if(dataInPeriod(value[10], value[11])) { //проверяем входит ли дата в период работ
+                  //  System.out.println(value[10]);
+
+
+                    if (((value[10].charAt(0) >= '0') && (value[10].charAt(0) <= '9'))
+                            && ((value[12].charAt(0) >= '0') && (value[12].charAt(0) <= '9'))) {
+                        System.out.println(value[10] +" " + value[12]);
+//                    if (dataInPeriod(value[10], value[11])) { //проверяем входит ли дата в период работ
 //                        counter++;
-//                    }
-                    k++;
+                    }
+//                    } else System.out.println("массив значений не содержит даты " + value[10] + " " + value[11]);
                 }
                 inputstrim.close();
-            }catch (FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         } catch (IOException ex) {
@@ -48,67 +48,57 @@ class DownFile {
         }
     }
 
-  private String[] spliter(String data) {
+    private String[] spliter(String data) {
         int l = data.length();
 
-      ArrayList <String> arrayList = new ArrayList<>();
-      StringBuilder temp = new StringBuilder();
+        ArrayList<String> arrayList = new ArrayList<>();
+        StringBuilder temp = new StringBuilder();
 
-        for(int i = 0; i<l; i++) {
+        for (int i = 0; i < l; i++) {
             char ch = data.charAt(i);
 
             if (i == 0) {
                 temp.append(ch);
-            } else if(i == (l-1)) {
+            } else if (i == (l - 1)) {
                 temp.append(ch);
                 arrayList.add(temp.toString()); // добавляем временную строку в массив
                 temp.delete(0, temp.length()); // очищаем временную строку
             } else {
-                char chP = data.charAt(i+1);
-                char chM = data.charAt(i-1);
-            if(((ch == ',')&&(chP == ' '))
-                ||((ch == ' ')&&(chM == ' '))) {
+                char chP = data.charAt(i + 1);
+                char chM = data.charAt(i - 1);
+                if (((ch == ',') && (chP == ' '))
+                        || ((ch == ' ') && (chM == ' '))) {
 
-            } else if(ch == ',') {
-                arrayList.add(temp.toString()); // добавляем временную строку в массив
-                temp.delete(0, temp.length()); // очищаем временную строку
-            }else
-                temp.append(ch);
+                } else if (ch == ',') {
+                    arrayList.add(temp.toString()); // добавляем временную строку в массив
+                    temp.delete(0, temp.length()); // очищаем временную строку
+                } else
+                    temp.append(ch);
             }
         }
-
-        String arr[] = arrayList.toArray(new String[arrayList.size()]);
-        return arr;
+        //arrayList.remove(0);
+        return arrayList.toArray(new String[arrayList.size()]);
     }
 
 
+    public boolean dataInPeriod(String dataBegin, String dataEnd) throws ParseException {
 
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMdd");
+            LocalDate begin = LocalDate.parse(dataBegin, format);
+            LocalDate end = LocalDate.parse(dataEnd, format);
+            LocalDate work = LocalDate.parse(DATA_WORK, format);
 
+            if (work.isBefore(begin) || (work.isAfter(end))) {
+                return true;
+            }
+        return false;
 
-
-
-
-
-
-    private boolean dataInPeriod(String dataBegin, String dataEnd) throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-      //  DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyMMdd");
-//        LocalDate begin = LocalDate.parse(dataBegin, formatter);
-//        LocalDate end = LocalDate.parse(dataEnd, formatter);
-//        LocalDate work = LocalDate.parse(DATA_WORK, formatter);
-
-        Date begin =  format.parse(dataBegin);
-        Date end =  format.parse(dataEnd);
-        Date work =  format.parse(DATA_WORK);
-
-        if(work.isBefore(begin)||(work.isAfter(end))) {
-            return false;
-        } else return true;
     }
 
     public int getCounterWorks() {
         return counter;
     }
+}
 
 
 
@@ -164,4 +154,4 @@ class DownFile {
 //
 //
 //    }
-}
+
