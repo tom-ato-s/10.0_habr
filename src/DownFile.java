@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 class DownFile {
     private final String URL_CSV; // ссылка на файл csv
@@ -28,17 +29,9 @@ class DownFile {
                     //System.out.println(data);
                     String value[] = spliter(data);
 
-                  //  System.out.println(value[10]);
-
-
-                    if (((value[10].charAt(0) >= '0') && (value[10].charAt(0) <= '9'))
-                            && ((value[12].charAt(0) >= '0') && (value[12].charAt(0) <= '9'))) {
-                        System.out.println(value[10] +" " + value[12]);
-//                    if (dataInPeriod(value[10], value[11])) { //проверяем входит ли дата в период работ
-//                        counter++;
-                    }
-//                    } else System.out.println("массив значений не содержит даты " + value[10] + " " + value[11]);
+                    counter10_11(value[10], value[11]);
                 }
+
                 inputstrim.close();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -46,6 +39,37 @@ class DownFile {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void counter10_11(String begin,String end) {
+       LocalDate work = parsingToDate( DATA_WORK);
+
+        if((isValue(begin) == true) &&(isValue(end) == true)) {
+            LocalDate beginData = parsingToDate(begin);
+            LocalDate endData = parsingToDate(end);
+            if((work.isAfter(beginData))&&(work.isBefore(endData))){
+                System.out.println(begin.toString() + " " + end.toString() + " " + counter);
+                counter++;
+            }
+        } else if ((isValue(begin) == true) &&(isValue(end) == false)&&(!(end.length() >8))) {   //&&(end == "-")
+            LocalDate beginData = parsingToDate(begin);
+            if(work.isAfter(beginData)) {
+                System.out.println(begin.toString() + " " + end.toString() + " " + counter);
+                counter++;
+            }
+        }
+    }
+
+    private boolean isValue(String data) {
+        if((data.charAt(0) >= '0') && (data.charAt(0) <= '9') && (data.length() == 8)) {
+            return true;
+        } return false;
+    }
+
+    private LocalDate parsingToDate(String s) {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate date = LocalDate.parse(s, format);
+        return date;
     }
 
     private String[] spliter(String data) {
@@ -76,28 +100,15 @@ class DownFile {
                     temp.append(ch);
             }
         }
-        //arrayList.remove(0);
         return arrayList.toArray(new String[arrayList.size()]);
     }
 
 
-    public boolean dataInPeriod(String dataBegin, String dataEnd) throws ParseException {
-
-            DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMdd");
-            LocalDate begin = LocalDate.parse(dataBegin, format);
-            LocalDate end = LocalDate.parse(dataEnd, format);
-            LocalDate work = LocalDate.parse(DATA_WORK, format);
-
-            if (work.isBefore(begin) || (work.isAfter(end))) {
-                return true;
-            }
-        return false;
-
-    }
 
     public int getCounterWorks() {
         return counter;
     }
+
 }
 
 
